@@ -44,7 +44,6 @@ void setup() {
     }
     WiFi.mode(WIFI_STA);
     wifiMulti.addAP("gutugutuBlade", "gu2gu2Network");
-    wifiMulti.addAP("mogumogu",     "gu2gu2Network");
     wifiMulti.addAP(ssid, pass);
     while (wifiMulti.run() != WL_CONNECTED) {
       delay(1000);
@@ -58,6 +57,7 @@ void setup() {
   }
   EEPROM.end();
   Server.on("/", handleRoot);
+  Server.on("/num", handleNum);
   Udp.begin(8888);
 
   Updater.setup(&Server, "gutu", "3030");
@@ -67,17 +67,23 @@ void setup() {
 int cnt = 0;
 unsigned long randomTime = 0;
 
+void setNumber(int x, int wait = 0) {
+  randomTime = wait + millis();
+  data = x;
+  if (wait == 0) {
+    seg7(data);
+  }
+}
+
 void setNumber(OSCMessage &mes) {
   switch (mes.size()) {
     case 1:
       if (mes.isInt(0)) {
-        data = mes.getInt(0);
-        seg7(data);
+        setNumber(mes.getInt(0));
       }
     case 2:
       if (mes.isInt(0) && mes.isInt(1)) {
-        randomTime = mes.getInt(1) + millis();
-        data = mes.getInt(0);
+        setNumber(mes.getInt(0),mes.getInt(1));
       }
   }
 }

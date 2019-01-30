@@ -4,7 +4,8 @@
 // 3
 //6 4
 // 5
-const int pins[7] = {14, 12, 13, 4, 5, 16, 15};
+const int pins[7] = {4,5,13,15,16,12,14};
+//const int pins[7] = {14, 12, 13, 4, 5, 16, 15};
 const int num[11][7] = {
   {LOW, LOW, LOW, HIGH, LOW, LOW, LOW},
   {LOW, HIGH, HIGH, HIGH, LOW, HIGH, HIGH},
