@@ -56,6 +56,7 @@ void setup() {
     IPAddress subnet(255, 255, 255, 0);
     WiFi.config(ip, gateway, subnet);
     showSeg(ipid);
+    postToOne();
   }
   EEPROM.end();
   Server.on("/num", handleNum);
@@ -69,6 +70,18 @@ void setup() {
 
 int cnt = 0;
 unsigned long randomTime = 0;
+
+void postToOne() {
+  OSCMessage mes("/shake");
+  mes.add(ipid);
+  mes.add(data);
+  IPAddress nowIP = WiFi.localIP();
+  IPAddress gateway(nowIP[0], nowIP[1], nowIP[2], 1);
+  Udp.beginPacket(gateway, 8888);
+  mes.send(Udp);
+  Udp.endPacket();
+  mes.empty();
+}
 
 void setNumber(int x, int wait = 0) {
   randomTime = wait + millis();
@@ -86,7 +99,7 @@ void setNumber(OSCMessage &mes) {
       }
     case 2:
       if (mes.isInt(0) && mes.isInt(1)) {
-        setNumber(mes.getInt(0),mes.getInt(1));
+        setNumber(mes.getInt(0), mes.getInt(1));
       }
   }
 }
@@ -98,6 +111,11 @@ void saveIP(OSCMessage &mes) {
     EEPROM.write(ID_ADDR, ipid);
     EEPROM.commit();
     EEPROM.end();
+  }
+}
+
+void addClient(OSCMessage &mes){
+  if (mes.size() == 2 && mes.isInt(0) && mes.isInt(1)) {
   }
 }
 
@@ -115,6 +133,7 @@ void loop() {
     if (!mes.hasError()) {
       mes.dispatch("/num", setNumber);
       mes.dispatch("/id", saveIP);
+      mes.dispatch("/shake", addClient);
     } else {
       Serial.println("error");
     }
