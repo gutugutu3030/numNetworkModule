@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NumServer</title>
+    <link href="bootstrap.min.css" rel="stylesheet">
+    <script src="jquery.min.js"></script>
+    <script src="bootstrap.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <!-- <div class="panel panel-default">
+            <div class="panel-body">
+                <form method="POST" action="http://192.168.4.1/num">
+                    <div class="form-group">
+                        <label>送信先</label>
+                        <select class="form-control" id="target" id="target">
+                            <option selected value="1">自身</option>
+                            <option value="0">全員</option>
+                            {option}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>number</label>
+                        <input type="number" name="num" id="num" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>waitTime</label>
+                        <input type="number" name="wait" id="wait" class="form-control" value=0>
+                    </div>
+                    <button type="submit">変更</button>
+                </form>
+            </div>
+        </div> -->
+        <div class="panel panel-default">
+            <div>
+                <label>送信先</label>
+                <select class="form-control" id="target" id="target">
+                    <option selected value="1">自身</option>
+                    <option value="0">全員</option>
+                    {option}
+                </select>
+            </div>
+            <div>
+                <label>number</label>
+                <input type="number" name="num" id="num" class="form-control">
+            </div>
+            <div>
+                <label>waitTime</label>
+                <input type="number" name="wait" id="wait" class="form-control" value=0>
+            </div>
+            <button id="submitButton">変更</button>
+        </div>
+    </div>
+    <script type="text/javascript">
+        $(function () {
+            $('#submitButton').click(
+                function () {
+                    var hostUrl = '/num';
+                    var num = $("#num").val();
+                    var wait = $("#wait").val();
+                    $.ajax({
+                        url: hostUrl,
+                        type: 'POST',
+                        dataType: 'json',
+                        data: { num: num, wait: wait },
+                        timeout: 3000,
+                    });
+                });
+        });
+    </script>
+</body>
+
+</html>

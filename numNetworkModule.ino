@@ -6,6 +6,7 @@
 #include <OSCMessage.h>
 #include <OSCBundle.h>
 #include <ESP8266WiFiMulti.h>
+#include <FS.h>
 
 
 #define ID_ADDR 0
@@ -26,6 +27,7 @@ int data = -1;
 
 void setup() {
   init7();
+  SPIFFS.begin();
   Serial.begin(115200);
   EEPROM.begin(EEPROMSIZE);
   ipid = EEPROM.read(ID_ADDR);
@@ -56,8 +58,9 @@ void setup() {
     showSeg(ipid);
   }
   EEPROM.end();
-  Server.on("/", handleRoot);
   Server.on("/num", handleNum);
+  Server.on("/nums", handleNum);
+  Server.onNotFound(handleNotFound);
   Udp.begin(8888);
 
   Updater.setup(&Server, "gutu", "3030");
