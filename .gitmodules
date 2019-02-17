@@ -1,0 +1,3 @@
+[submodule "OSCLib-for-ESP8266"]
+	path = OSCLib-for-ESP8266
+	url = https://github.com/stahlnow/OSCLib-for-ESP8266.git
