@@ -3,8 +3,8 @@
 #include <ESP8266HTTPUpdateServer.h>
 #include <EEPROM.h>
 #include <WiFiUdp.h>
-#include "OSCLib-for-ESP8266/src/OSCMessage.h"
-#include "OSCLib-for-ESP8266/src/OSCBundle.h"
+#include <OSCMessage.h>
+#include <OSCBundle.h>
 #include <ESP8266WiFiMulti.h>
 #include <FS.h>
 
