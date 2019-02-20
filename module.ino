@@ -1,5 +1,4 @@
-#define NIXIE
-
+#include "hardware.h"
 
 #ifdef NIXIE
 //pins:[16,4,12,5] C D A B
