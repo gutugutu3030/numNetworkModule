@@ -7,11 +7,12 @@
 #include <OSCBundle.h>
 #include <ESP8266WiFiMulti.h>
 #include <FS.h>
-
+#include <WebSocketsServer.h>
 
 #define ID_ADDR 0
 #define DATA_ADDR 1
 #define EEPROMSIZE 10
+#define RSSI_SEARCH_INTERVAL 100
 
 ESP8266WiFiMulti wifiMulti;
 
@@ -19,11 +20,19 @@ ESP8266WebServer Server(80);         //  ウェブサーバ＠ポート番号（
 ESP8266HTTPUpdateServer Updater;     //  ウェブアップデート
 WiFiUDP Udp;
 
+void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length);
+
+WebSocketsServer webSocket = WebSocketsServer(443);
+
 const char *ssid = "numNetwork";
 const char *pass = "numnumnum";      //  ８文字以上
 
 int ipid = 100;
 int data = -1;
+
+boolean isClient = false;
+unsigned long lastRssiSerchTime = 0;
+int distance = 0;
 
 void setup() {
   init7();
@@ -36,6 +45,7 @@ void setup() {
     WiFi.mode(WIFI_AP);
     WiFi.softAP(ssid, pass);
     showSeg(ipid);
+    isClient = false;
   } else {
     //クライアントモード
     if (ipid <= 0 || ipid > 255) {
@@ -56,6 +66,7 @@ void setup() {
     IPAddress subnet(255, 255, 255, 0);
     WiFi.config(ip, gateway, subnet);
     showSeg(ipid);
+    isClient = true;
   }
   EEPROM.end();
   Server.on("/num", handleNum);
@@ -63,15 +74,24 @@ void setup() {
   Server.onNotFound(handleNotFound);
   Udp.begin(8888);
 
+  webSocket.begin();
+  webSocket.onEvent(webSocketEvent);
+
   Updater.setup(&Server, "gutu", "3030");
   Server.begin();
 }
 
 int cnt = 0;
 unsigned long randomTime = 0;
+unsigned long startTime = 0;
 
-void setNumber(int x, int wait = 0) {
-  randomTime = wait + millis();
+void setNumber(int x, int wait = 0, float speed = 0) {
+  if (speed == 0) {
+    startTime = millis();
+  } else {
+    startTime = millis() + (int)(distance / speed);
+  }
+  randomTime = wait + startTime;
   data = x;
   if (wait == 0) {
     seg7(data);
@@ -86,7 +106,14 @@ void setNumber(OSCMessage &mes) {
       }
     case 2:
       if (mes.isInt(0) && mes.isInt(1)) {
-        setNumber(mes.getInt(0),mes.getInt(1));
+        setNumber(mes.getInt(0), mes.getInt(1));
+      }
+    case 3:
+      if (mes.isInt(0) && mes.isInt(1) && (mes.getFloat(2))) {
+        setNumber(mes.getInt(0), mes.getInt(1), mes.getFloat(2));
+      }
+      else if (mes.isInt(0) && mes.isInt(1) && (mes.isDouble(2))) {
+        setNumber(mes.getInt(0), mes.getInt(1), (float)mes.getDouble(2));
       }
   }
 }
@@ -105,6 +132,7 @@ void loop() {
   //  クライアントからの要求を処理する
   Server.handleClient();
   //  main loop
+  webSocket.loop();
   OSCMessage  mes;
   int packetCount = Udp.parsePacket();
   if (packetCount > 0) {
@@ -119,12 +147,20 @@ void loop() {
       Serial.println("error");
     }
   }
-  if (randomTime > millis()) {
+  if (startTime >millis()){
+    
+  }else if (randomTime > millis()) {
     if (millis() % 30 == 0) {
       int rnd = (int)random(9);
       seg7(rnd < data ? rnd : (rnd + 1));
     }
   } else {
     seg7(data);
+  }
+  if (isClient && lastRssiSerchTime + RSSI_SEARCH_INTERVAL < millis()) {
+    long rssi = WiFi.RSSI();
+    double d = pow(10.0f , (float)((20.5f - WiFi.RSSI()) / 20.0f));
+    distance = (int)d / 10;
+    lastRssiSerchTime = millis();
   }
 }

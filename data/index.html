@@ -13,53 +13,68 @@
 
 <body>
     <div class="container">
-        <!-- <div class="panel panel-default">
-            <div class="panel-body">
-                <form method="POST" action="http://192.168.4.1/num">
-                    <div class="form-group">
-                        <label>送信先</label>
-                        <select class="form-control" id="target" id="target">
-                            <option selected value="1">自身</option>
-                            <option value="0">全員</option>
-                            {option}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>number</label>
-                        <input type="number" name="num" id="num" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label>waitTime</label>
-                        <input type="number" name="wait" id="wait" class="form-control" value=0>
-                    </div>
-                    <button type="submit">変更</button>
-                </form>
+        <div class="row">
+            <div class="col-md-6">
+                <div>
+                    <label>送信先</label>
+                    <select class="form-control" id="target" id="target">
+                        <option selected value="1">自身</option>
+                        <option value="0">全員</option>
+                    </select>
+                </div>
+                <div>
+                    <label>number</label>
+                    <input type="number" name="num" id="num" class="form-control">
+                </div>
+                <div>
+                    <label>waitTime</label>
+                    <input type="number" name="wait" id="wait" class="form-control" value=0>
+                </div>
+                <button id="submitButton">変更</button>
             </div>
-        </div> -->
-        <div class="panel panel-default">
-            <div>
-                <label>送信先</label>
-                <select class="form-control" id="target" id="target">
-                    <option selected value="1">自身</option>
-                    <option value="0">全員</option>
-                    {option}
-                </select>
+            <div class="col-md-6" id="test">
+                <table id="idlist" class="table">
+                    <thead>
+                        <tr>
+                            <th>id</th>
+                            <th>number</th>
+                        </tr>
+                    </thead>
+                    <tbody id="idlist1">
+                        <tr>
+                            <td>1</td>
+                            <td>2</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            <div>
-                <label>number</label>
-                <input type="number" name="num" id="num" class="form-control">
-            </div>
-            <div>
-                <label>waitTime</label>
-                <input type="number" name="wait" id="wait" class="form-control" value=0>
-            </div>
-            <button id="submitButton">変更</button>
         </div>
+
+
     </div>
     <script type="text/javascript">
+        var sock = new WebSocket('ws://' + location.hostname + ':443');
+
+        sock.addEventListener('open', function (e) {
+            console.log('Socket 接続成功');
+        });
+
+        // サーバーからデータを受け取る
+        sock.addEventListener('message', function (e) {
+            console.log(e.data);
+        });
+
+
         $(function () {
             $('#submitButton').click(
+
                 function () {
+                    $('#test').append("setuzokukanryou");
+
+                    $('#idlist1').append(
+                        $("<tr></tr>")
+                            .append($("<td></td>").text("ふえた"))
+                            .append($("<td></td>").text("ふえた")));
                     var hostUrl = '/num';
                     var num = $("#num").val();
                     var wait = $("#wait").val();
@@ -71,6 +86,8 @@
                         timeout: 3000,
                     });
                 });
+            sock.send("hello");
+            console.log("hello")
         });
     </script>
 </body>
