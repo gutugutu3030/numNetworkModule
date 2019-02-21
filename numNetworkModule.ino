@@ -7,7 +7,7 @@
 #include <OSCBundle.h>
 #include <ESP8266WiFiMulti.h>
 #include <FS.h>
-
+#include "hardware.h"
 
 #define ID_ADDR 0
 #define DATA_ADDR 1
@@ -24,6 +24,14 @@ const char *pass = "numnumnum";      //  ８文字以上
 
 int ipid = 100;
 int data = -1;
+
+#ifdef NIXIE
+#define DEPTH_LEN 18
+const int numberDepth[DEPTH_LEN] = {1, 0, 2, 9, 3, 8, 4, 7, 5, 6, 5, 7, 4, 8, 3, 9, 2, 0};
+int randomDir = 1;
+int randomCurrentIndex = 0, randomTargetIndex = 0;
+int randomWaitTime = 1;
+#endif
 
 void setup() {
   init7();
@@ -85,6 +93,23 @@ void postToOne() {
 
 void setNumber(int x, int wait = 0) {
   randomTime = wait + millis();
+#ifdef NIXIE
+  randomWaitTime = wait;
+  for (int i = 0; i < DEPTH_LEN; i++) {
+    if (numberDepth[i] == x) {
+      randomTargetIndex = i;
+      if(wait==0){
+        randomCurrentIndex=i;
+      }
+      if (i < randomCurrentIndex) {
+        randomDir = 1;
+      } else {
+        randomDir = -1;
+      }
+      break;
+    }
+  }
+#endif
   data = x;
   if (wait == 0) {
     seg7(data);
@@ -114,7 +139,7 @@ void saveIP(OSCMessage &mes) {
   }
 }
 
-void addClient(OSCMessage &mes){
+void addClient(OSCMessage &mes) {
   if (mes.size() == 2 && mes.isInt(0) && mes.isInt(1)) {
   }
 }
@@ -138,6 +163,18 @@ void loop() {
       Serial.println("error");
     }
   }
+#ifdef NIXIE
+  if (randomTime <= millis()) {
+    if (randomWaitTime != 0 && randomTargetIndex != randomCurrentIndex) {
+      randomTime += randomWaitTime;
+      randomCurrentIndex = (randomCurrentIndex + randomDir + DEPTH_LEN) % DEPTH_LEN;
+      seg7(numberDepth[randomCurrentIndex]);
+    } else {
+      seg7(data);
+    }
+  }
+
+#else
   if (randomTime > millis()) {
     if (millis() % 30 == 0) {
       int rnd = (int)random(9);
@@ -146,4 +183,6 @@ void loop() {
   } else {
     seg7(data);
   }
+#endif
+
 }
