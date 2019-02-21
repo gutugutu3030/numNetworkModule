@@ -8,6 +8,7 @@
 #include <ESP8266WiFiMulti.h>
 #include <FS.h>
 #include <WebSocketsServer.h>
+#include "hardware.h"
 
 #define ID_ADDR 0
 #define DATA_ADDR 1
@@ -33,6 +34,14 @@ int data = -1;
 boolean isClient = false;
 unsigned long lastRssiSerchTime = 0;
 int distance = 0;
+
+#ifdef NIXIE
+#define DEPTH_LEN 18
+const int numberDepth[DEPTH_LEN] = {1, 0, 2, 9, 3, 8, 4, 7, 5, 6, 5, 7, 4, 8, 3, 9, 2, 0};
+int randomDir = 1;
+int randomCurrentIndex = 0, randomTargetIndex = 0;
+int randomWaitTime = 1;
+#endif
 
 void setup() {
   init7();
@@ -67,6 +76,7 @@ void setup() {
     WiFi.config(ip, gateway, subnet);
     showSeg(ipid);
     isClient = true;
+    postToOne();
   }
   EEPROM.end();
   Server.on("/num", handleNum);
@@ -85,6 +95,18 @@ int cnt = 0;
 unsigned long randomTime = 0;
 unsigned long startTime = 0;
 
+void postToOne() {
+  OSCMessage mes("/shake");
+  mes.add(ipid);
+  mes.add(data);
+  IPAddress nowIP = WiFi.localIP();
+  IPAddress gateway(nowIP[0], nowIP[1], nowIP[2], 1);
+  Udp.beginPacket(gateway, 8888);
+  mes.send(Udp);
+  Udp.endPacket();
+  mes.empty();
+}
+
 void setNumber(int x, int wait = 0, float speed = 0) {
   if (speed == 0) {
     startTime = millis();
@@ -92,6 +114,23 @@ void setNumber(int x, int wait = 0, float speed = 0) {
     startTime = millis() + (int)(distance / speed);
   }
   randomTime = wait + startTime;
+#ifdef NIXIE
+  randomWaitTime = wait;
+  for (int i = 0; i < DEPTH_LEN; i++) {
+    if (numberDepth[i] == x) {
+      randomTargetIndex = i;
+      if(wait==0){
+        randomCurrentIndex=i;
+      }
+      if (i < randomCurrentIndex) {
+        randomDir = 1;
+      } else {
+        randomDir = -1;
+      }
+      break;
+    }
+  }
+#endif
   data = x;
   if (wait == 0) {
     seg7(data);
@@ -128,6 +167,11 @@ void saveIP(OSCMessage &mes) {
   }
 }
 
+void addClient(OSCMessage &mes) {
+  if (mes.size() == 2 && mes.isInt(0) && mes.isInt(1)) {
+  }
+}
+
 void loop() {
   //  クライアントからの要求を処理する
   Server.handleClient();
@@ -143,13 +187,27 @@ void loop() {
     if (!mes.hasError()) {
       mes.dispatch("/num", setNumber);
       mes.dispatch("/id", saveIP);
+      mes.dispatch("/shake", addClient);
     } else {
       Serial.println("error");
     }
   }
   if (startTime >millis()){
     
-  }else if (randomTime > millis()) {
+  }
+#ifdef NIXIE
+  else if (randomTime <= millis()) {
+    if (randomWaitTime != 0 && randomTargetIndex != randomCurrentIndex) {
+      randomTime += randomWaitTime;
+      randomCurrentIndex = (randomCurrentIndex + randomDir + DEPTH_LEN) % DEPTH_LEN;
+      seg7(numberDepth[randomCurrentIndex]);
+    } else {
+      seg7(data);
+    }
+  }
+
+#else
+  else if (randomTime > millis()) {
     if (millis() % 30 == 0) {
       int rnd = (int)random(9);
       seg7(rnd < data ? rnd : (rnd + 1));
@@ -157,6 +215,7 @@ void loop() {
   } else {
     seg7(data);
   }
+#endif
   if (isClient && lastRssiSerchTime + RSSI_SEARCH_INTERVAL < millis()) {
     long rssi = WiFi.RSSI();
     double d = pow(10.0f , (float)((20.5f - WiFi.RSSI()) / 20.0f));

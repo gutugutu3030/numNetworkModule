@@ -32,6 +32,29 @@
                 </div>
                 <button id="submitButton">変更</button>
             </div>
+
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <form method="POST" action="/num">
+                    <div class="form-group">
+                        <label>送信先</label>
+                        <select class="form-control" id="target" id="target">
+                            <option selected value="1">自身</option>
+                            <option value="0">全員</option>
+                            {option}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>number</label>
+                        <input type="number" name="num" id="num" class="form-control" value=0>
+                    </div>
+                    <div class="form-group">
+                        <label>waitTime</label>
+                        <input type="number" name="wait" id="wait" class="form-control" value=10>
+                    </div>
+                    <button type="submit" id="submitButton">変更</button>
+                </form>
+            </div>
             <div class="col-md-6" id="test">
                 <table id="idlist" class="table">
                     <thead>
@@ -66,15 +89,7 @@
 
 
         $(function () {
-            $('#submitButton').click(
-
-                function () {
-                    $('#test').append("setuzokukanryou");
-
-                    $('#idlist1').append(
-                        $("<tr></tr>")
-                            .append($("<td></td>").text("ふえた"))
-                            .append($("<td></td>").text("ふえた")));
+            $('#submitButton').click(function (e) {
                     var hostUrl = '/num';
                     var num = $("#num").val();
                     var wait = $("#wait").val();
@@ -85,9 +100,8 @@
                         data: { num: num, wait: wait },
                         timeout: 3000,
                     });
-                });
-            sock.send("hello");
-            console.log("hello")
+                return false;
+            });
         });
     </script>
 </body>
