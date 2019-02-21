@@ -13,9 +13,9 @@
 
 <body>
     <div class="container">
-        <!-- <div class="panel panel-default">
+        <div class="panel panel-default">
             <div class="panel-body">
-                <form method="POST" action="http://192.168.4.1/num">
+                <form method="POST" action="/num">
                     <div class="form-group">
                         <label>送信先</label>
                         <select class="form-control" id="target" id="target">
@@ -26,40 +26,20 @@
                     </div>
                     <div class="form-group">
                         <label>number</label>
-                        <input type="number" name="num" id="num" class="form-control">
+                        <input type="number" name="num" id="num" class="form-control" value=0>
                     </div>
                     <div class="form-group">
                         <label>waitTime</label>
-                        <input type="number" name="wait" id="wait" class="form-control" value=0>
+                        <input type="number" name="wait" id="wait" class="form-control" value=10>
                     </div>
-                    <button type="submit">変更</button>
+                    <button type="submit" id="submitButton">変更</button>
                 </form>
             </div>
-        </div> -->
-        <div class="panel panel-default">
-            <div>
-                <label>送信先</label>
-                <select class="form-control" id="target" id="target">
-                    <option selected value="1">自身</option>
-                    <option value="0">全員</option>
-                    {option}
-                </select>
-            </div>
-            <div>
-                <label>number</label>
-                <input type="number" name="num" id="num" class="form-control">
-            </div>
-            <div>
-                <label>waitTime</label>
-                <input type="number" name="wait" id="wait" class="form-control" value=0>
-            </div>
-            <button id="submitButton">変更</button>
         </div>
     </div>
     <script type="text/javascript">
         $(function () {
-            $('#submitButton').click(
-                function () {
+            $('#submitButton').click(function (e) {
                     var hostUrl = '/num';
                     var num = $("#num").val();
                     var wait = $("#wait").val();
@@ -70,7 +50,9 @@
                         data: { num: num, wait: wait },
                         timeout: 3000,
                     });
-                });
+
+                return false;
+            });
         });
     </script>
 </body>
