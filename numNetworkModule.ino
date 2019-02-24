@@ -107,13 +107,31 @@ void postToOne() {
   mes.empty();
 }
 
+void broadcastNum(int x, int wait = 0, float speed = 0){
+  OSCMessage mes("/num");
+  mes.add(x);
+  mes.add(wait);
+  if(speed>0.01f){
+    mes.add(speed);
+  }
+  IPAddress nowIP = WiFi.localIP();
+  IPAddress broadcast(nowIP[0], nowIP[1], nowIP[2], 255);
+  Udp.beginPacket(broadcast, 8888);
+  mes.send(Udp);
+  Udp.endPacket();
+  mes.empty();
+}
+
 void setNumber(int x, int wait = 0, float speed = 0) {
-  if (speed == 0) {
+  if (speed <=0.01f) {
     startTime = millis();
   } else {
     startTime = millis() + (int)(distance / speed);
   }
   randomTime = wait + startTime;
+  if(x==-1){
+    x=(int)random(10);
+  }
 #ifdef NIXIE
   randomWaitTime = wait;
   for (int i = 0; i < DEPTH_LEN; i++) {
@@ -148,6 +166,9 @@ void setNumber(OSCMessage &mes) {
         setNumber(mes.getInt(0), mes.getInt(1));
       }
     case 3:
+      if (mes.isInt(0) && mes.isInt(1) && (mes.isInt(2))) {
+        setNumber(mes.getInt(0), mes.getInt(1), mes.getInt(2));
+      }
       if (mes.isInt(0) && mes.isInt(1) && (mes.getFloat(2))) {
         setNumber(mes.getInt(0), mes.getInt(1), mes.getFloat(2));
       }
