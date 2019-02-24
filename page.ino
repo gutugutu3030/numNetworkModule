@@ -55,6 +55,7 @@ void handleNum() {
 
     String speeds = Server.arg("speed");
     float speed = speeds.toFloat();
+    
 
     switch (target) {
       case 1:
@@ -63,6 +64,7 @@ void handleNum() {
         break;
       case 0:
         //broadcast
+        setNumber(num, wait, speed);
         broadcastNum(num, wait, speed);
         break;
     }
