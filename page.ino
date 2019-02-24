@@ -66,6 +66,7 @@ void handleNum() {
         broadcastNum(num, wait, speed);
         break;
     }
+    Server.send(200, "application/json", "{}");
   }
 }
 
