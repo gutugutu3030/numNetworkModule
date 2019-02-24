@@ -13,26 +13,6 @@
 
 <body>
     <div class="container">
-        <div class="row">
-            <div class="col-md-6">
-                <div>
-                    <label>送信先</label>
-                    <select class="form-control" id="target" id="target">
-                        <option selected value="1">自身</option>
-                        <option value="0">全員</option>
-                    </select>
-                </div>
-                <div>
-                    <label>number</label>
-                    <input type="number" name="num" id="num" class="form-control">
-                </div>
-                <div>
-                    <label>waitTime</label>
-                    <input type="number" name="wait" id="wait" class="form-control" value=0>
-                </div>
-                <button id="submitButton">変更</button>
-            </div>
-
         <div class="panel panel-default">
             <div class="panel-body">
                 <form method="POST" action="/num">
@@ -41,68 +21,77 @@
                         <select class="form-control" id="target" id="target">
                             <option selected value="1">自身</option>
                             <option value="0">全員</option>
-                            {option}
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>number</label>
-                        <input type="number" name="num" id="num" class="form-control" value=0>
+                        <label>waitTime</label>
+                        <input type="number" name="wait" id="wait" class="form-control" value=30>
                     </div>
                     <div class="form-group">
-                        <label>waitTime</label>
-                        <input type="number" name="wait" id="wait" class="form-control" value=10>
+                        <label>speed</label>
+                        <input type="number" name="speed" id="speed" class="form-control" value=0>
                     </div>
-                    <button type="submit" id="submitButton">変更</button>
                 </form>
             </div>
-            <div class="col-md-6" id="test">
-                <table id="idlist" class="table">
-                    <thead>
-                        <tr>
-                            <th>id</th>
-                            <th>number</th>
-                        </tr>
-                    </thead>
-                    <tbody id="idlist1">
-                        <tr>
-                            <td>1</td>
-                            <td>2</td>
-                        </tr>
-                    </tbody>
-                </table>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <h3>数字変更</h3>
+                <div class="row">
+                    <div class="col-xs-4">
+                        <button class="btn btn-default btn-lg btn-block" onclick="setNum(1)">1</button>
+                    </div>
+                    <div class="col-xs-4">
+                        <button class="btn btn-default btn-lg btn-block" onclick="setNum(2)">2</button>
+                    </div>
+                    <div class="col-xs-4">
+                        <button class="btn btn-default btn-lg btn-block" onclick="setNum(3)">3</button>
+                    </div>
+                    <div class="col-xs-4">
+                        <button class="btn btn-default btn-lg btn-block" onclick="setNum(4)">4</button>
+                    </div>
+                    <div class="col-xs-4">
+                        <button class="btn btn-default btn-lg btn-block" onclick="setNum(5)">5</button>
+                    </div>
+                    <div class="col-xs-4">
+                        <button class="btn btn-default btn-lg btn-block" onclick="setNum(6)">6</button>
+                    </div>
+                    <div class="col-xs-4">
+                        <button class="btn btn-default btn-lg btn-block" onclick="setNum(7)">7</button>
+                    </div>
+                    <div class="col-xs-4">
+                        <button class="btn btn-default btn-lg btn-block" onclick="setNum(8)">8</button>
+                    </div>
+                    <div class="col-xs-4">
+                        <button class="btn btn-default btn-lg btn-block" onclick="setNum(9)">9</button>
+                    </div>
+                    <div class="col-xs-4">
+                        <button class="btn btn-default btn-lg btn-block" onclick="setNum(0)">0</button>
+                    </div>
+                    <div class="col-xs-8">
+                        <button class="btn btn-default btn-lg btn-block" onclick="setNum(-1)">random</button>
+                    </div>
+                </div>
             </div>
         </div>
-
-
     </div>
     <script type="text/javascript">
         var sock = new WebSocket('ws://' + location.hostname + ':443');
-
-        sock.addEventListener('open', function (e) {
-            console.log('Socket 接続成功');
-        });
 
         // サーバーからデータを受け取る
         sock.addEventListener('message', function (e) {
             console.log(e.data);
         });
 
-
-        $(function () {
-            $('#submitButton').click(function (e) {
-                    var hostUrl = '/num';
-                    var num = $("#num").val();
-                    var wait = $("#wait").val();
-                    $.ajax({
-                        url: hostUrl,
-                        type: 'POST',
-                        dataType: 'json',
-                        data: { num: num, wait: wait },
-                        timeout: 3000,
-                    });
-                return false;
+        function setNum(num) {
+            $.ajax({
+                url: hostUrl,
+                type: 'POST',
+                dataType: 'json',
+                data: { num: num, wait: $("#wait").val(), speed: $("#speed").val(), self: $("#target").val() },
+                timeout: 3000,
             });
-        });
+        };
     </script>
 </body>
 
