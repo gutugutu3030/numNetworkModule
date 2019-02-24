@@ -85,7 +85,7 @@
 
         function setNum(num) {
             $.ajax({
-                url: hostUrl,
+                url: '/num',
                 type: 'POST',
                 dataType: 'json',
                 data: { num: num, wait: $("#wait").val(), speed: $("#speed").val(), self: $("#target").val() },
