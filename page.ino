@@ -7,13 +7,13 @@ void handleNotFound() {
 }
 
 //  MIMEタイプを推定
-String getContentType(String filename){
-  if(filename.endsWith(".html") || filename.endsWith(".htm")) return "text/html";
-  else if(filename.endsWith(".css")) return "text/css";
-  else if(filename.endsWith(".js")) return "application/javascript";
-  else if(filename.endsWith(".png")) return "image/png";
-  else if(filename.endsWith(".gif")) return "image/gif";
-  else if(filename.endsWith(".jpg")) return "image/jpeg";
+String getContentType(String filename) {
+  if (filename.endsWith(".html") || filename.endsWith(".htm")) return "text/html";
+  else if (filename.endsWith(".css")) return "text/css";
+  else if (filename.endsWith(".js")) return "application/javascript";
+  else if (filename.endsWith(".png")) return "image/png";
+  else if (filename.endsWith(".gif")) return "image/gif";
+  else if (filename.endsWith(".jpg")) return "image/jpeg";
   else return "text/plain";
 }
 
@@ -21,10 +21,10 @@ String getContentType(String filename){
 bool handleFileRead(String path) {
   Serial.println("handleFileRead: trying to read " + path);
   // パス指定されたファイルがあればクライアントに送信する
-  bool isIndex=false;
-  if (path.endsWith("/")){
+  bool isIndex = false;
+  if (path.endsWith("/")) {
     path += "index.html";
-    isIndex=true;
+    isIndex = true;
   }
   String contentType = getContentType(path);
   if (SPIFFS.exists(path)) {
@@ -45,24 +45,44 @@ bool handleFileRead(String path) {
 void handleNum() {
   if (Server.method() == HTTP_POST) {
     String nums = Server.arg("num");
-    int num=nums.toInt();
+    int num = nums.toInt();
+
     String waits = Server.arg("wait");
-    int wait=waits.toInt();
-    setNumber(num,wait);
+    int wait = waits.toInt();
+
+    String targets = Server.arg("self");
+    int target = targets.toInt();
+
+    String speeds = Server.arg("speed");
+    float speed = speeds.toFloat();
+    
+
+    switch (target) {
+      case 1:
+        //self
+        setNumber(num, wait, speed);
+        break;
+      case 0:
+        //broadcast
+        setNumber(num, wait, speed);
+        broadcastNum(num, wait, speed);
+        break;
+    }
+    Server.send(200, "application/json", "{}");
   }
 }
 
-void handleNums(){
-  
+void handleNums() {
+
 }
 
-void handleShake(){
+void handleShake() {
   if (Server.method() == HTTP_POST) {
     String nums = Server.arg("num");
-    int num=nums.toInt();
+    int num = nums.toInt();
     String ids = Server.arg("id");
-    int id=ids.toInt();
+    int id = ids.toInt();
   }
-  
+
 }
 
