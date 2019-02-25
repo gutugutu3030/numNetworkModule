@@ -1,8 +1,7 @@
 void handleNotFound() {
   if (! handleFileRead(Server.uri())) {
     //  ファイルが見つかりません
-    Serial.println("404 not found");
-    Server.send(404, "text/plain", "File not found in Dongbeino...");
+    Server.send(404, "text/plain", "File not found > _ <");
   }
 }
 
@@ -19,7 +18,6 @@ String getContentType(String filename) {
 
 //  SPIFSS のファイルをクライアントに転送する
 bool handleFileRead(String path) {
-  Serial.println("handleFileRead: trying to read " + path);
   // パス指定されたファイルがあればクライアントに送信する
   bool isIndex = false;
   if (path.endsWith("/")) {
@@ -28,15 +26,11 @@ bool handleFileRead(String path) {
   }
   String contentType = getContentType(path);
   if (SPIFFS.exists(path)) {
-    Serial.println("handleFileRead: sending " + path);
     File file = SPIFFS.open(path, "r");
-    Server.streamFile(file, contentType);
     file.close();
-    Serial.println("handleFileRead: sent " + path);
     return true;
   }
   else {
-    Serial.println("handleFileRead: 404 not found");
     Server.send (404, "text/plain", "ESP: 404 not found");
     return false;
   }
