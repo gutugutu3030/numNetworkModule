@@ -107,14 +107,14 @@ void postToOne() {
   mes.empty();
 }
 
-void broadcastNum(int x, int wait = 0, float speed = 0){
+void broadcastNum(int x, int wait = 0, float speed = 0) {
   OSCMessage mes("/num");
   mes.add(x);
   mes.add(wait);
-  if(speed>0.01f){
+  if (speed > 0.01f) {
     mes.add(speed);
   }
-  IPAddress nowIP = WiFi.localIP();
+  IPAddress nowIP = (isClient)? WiFi.localIP():WiFi.softAPIP();
   IPAddress broadcast(nowIP[0], nowIP[1], nowIP[2], 255);
   Udp.beginPacket(broadcast, 8888);
   mes.send(Udp);
@@ -123,22 +123,22 @@ void broadcastNum(int x, int wait = 0, float speed = 0){
 }
 
 void setNumber(int x, int wait = 0, float speed = 0) {
-  if (speed <=0.01f) {
+  if (speed <= 0.01f) {
     startTime = millis();
   } else {
     startTime = millis() + (int)(distance / speed);
   }
   randomTime = wait + startTime;
-  if(x==-1){
-    x=(int)random(10);
+  if (x == -1) {
+    x = (int)random(10);
   }
 #ifdef NIXIE
   randomWaitTime = wait;
   for (int i = 0; i < DEPTH_LEN; i++) {
     if (numberDepth[i] == x) {
       randomTargetIndex = i;
-      if(wait==0){
-        randomCurrentIndex=i;
+      if (wait == 0) {
+        randomCurrentIndex = i;
       }
       if (i < randomCurrentIndex) {
         randomDir = 1;
@@ -213,8 +213,8 @@ void loop() {
       Serial.println("error");
     }
   }
-  if (startTime >millis()){
-    
+  if (startTime > millis()) {
+
   }
 #ifdef NIXIE
   else if (randomTime <= millis()) {
