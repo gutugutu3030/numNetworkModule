@@ -27,6 +27,7 @@ bool handleFileRead(String path) {
   String contentType = getContentType(path);
   if (SPIFFS.exists(path)) {
     File file = SPIFFS.open(path, "r");
+    Server.streamFile(file, contentType);
     file.close();
     return true;
   }
