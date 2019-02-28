@@ -114,7 +114,7 @@ void broadcastNum(int x, int wait = 0, float speed = 0) {
   if (speed > 0.01f) {
     mes.add(speed);
   }
-  IPAddress nowIP = (isClient)? WiFi.localIP():WiFi.softAPIP();
+  IPAddress nowIP = (isClient) ? WiFi.localIP() : WiFi.softAPIP();
   IPAddress broadcast(nowIP[0], nowIP[1], nowIP[2], 255);
   Udp.beginPacket(broadcast, 8888);
   mes.send(Udp);
@@ -128,12 +128,17 @@ void setNumber(int x, int wait = 0, float speed = 0) {
   } else {
     startTime = millis() + (int)(distance / speed);
   }
+#ifdef NIXIE
+  randomTime = wait / 10 + startTime;
+#else
   randomTime = wait + startTime;
+#endif
   if (x == -1) {
-    x = (int)random(10);
+    int rnd = (int)random(9);
+    x = (rnd < data ? rnd : (rnd + 1));
   }
 #ifdef NIXIE
-  randomWaitTime = wait;
+  randomWaitTime = wait / 10;
   for (int i = 0; i < DEPTH_LEN; i++) {
     if (numberDepth[i] == x) {
       randomTargetIndex = i;
